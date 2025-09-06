@@ -50,7 +50,8 @@ topology:
       kind: linux
       image: docker.io/esanchezv/srvhttps:latest
       mgmt-ipv4: 172.20.20.100
-      #cmd: "/bin/sh -c 'apt-get update && apt-get install -y net-tools iputils-ping && sleep infinity'"
+      exec:
+       - ip addr add 10.10.10.100/24 dev eth1
 
     pc-branch:
       kind: linux
