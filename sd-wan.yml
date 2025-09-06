@@ -1,0 +1,74 @@
+name: forti-sdwan
+
+topology:
+  nodes:
+    # FortiGates - Dispositivos SD-WAN
+    fgt-branch:
+      kind: fortinet_fortigate
+      image: vrnetlab/vr-fortios:6.0.3
+      env:
+        QEMU_SMP: 1
+        QEMU_MEMORY: 1024
+      ports:
+        - 80:80
+        - 443:443
+      mgmt-ipv4: 172.20.20.21
+
+    fgt-datacenter:
+      kind: fortinet_fortigate
+      image: vrnetlab/vr-fortios:6.0.3
+      env:
+        QEMU_SMP: 1
+        QEMU_MEMORY: 1024
+      ports:
+        - 8080:80
+        - 4443:443
+      mgmt-ipv4: 172.20.20.22
+
+    # Nodos que simulan los ISPs (Solo proveen conectividad underlay)
+    isp1:
+      kind: linux
+      image: docker.io/esanchezv/srvhttps:latest
+      mgmt-ipv4: 172.20.20.11
+      cmd: "/bin/sh -c 'echo \"net.ipv4.ip_forward=1\" >> /etc/sysctl.conf && sysctl -p && sleep infinity'"
+
+    isp2:
+      kind: linux
+      image: docker.io/esanchezv/srvhttps:latest
+      mgmt-ipv4: 172.20.20.12
+      cmd: "/bin/sh -c 'echo \"net.ipv4.ip_forward=1\" >> /etc/sysctl.conf && sysctl -p && sleep infinity'"
+
+    # Servidores y Clientes de Simulación
+    server-dc:
+      kind: linux
+      image: docker.io/esanchezv/srvhttps:latest
+      mgmt-ipv4: 172.20.20.100
+      #cmd: "/bin/sh -c 'apt-get update && apt-get install -y net-tools iputils-ping && sleep infinity'"
+
+    pc-branch:
+      kind: linux
+      image: docker.io/esanchezv/kaliipv6:latest
+      mgmt-ipv4: 172.20.20.101
+      
+
+  links:
+    # -----------------------------------------------
+    # CONEXIONES UNDERLAY (REDES WAN/INTERNET)
+    # -----------------------------------------------
+    
+    # Sucursal: Conexiones a los ISPs
+    - endpoints: ["fgt-branch:eth1", "isp1:eth1"]  # Enlace Principal (Fibra)
+    - endpoints: ["fgt-branch:eth2", "isp2:eth1"]  # Enlace de Backup (4G/5G)
+
+    # Data Center: Conexión a ISP1
+    - endpoints: ["fgt-datacenter:eth1", "isp1:eth2"]
+
+    # -----------------------------------------------
+    # CONEXIONES OVERLAY (REDES LAN PRIVADAS)
+    # -----------------------------------------------
+    
+    # Red LAN de la Sucursal
+    - endpoints: ["fgt-branch:eth3", "pc-branch:eth1"]
+
+    # Red LAN del Data Center
+    - endpoints: ["fgt-datacenter:eth2", "server-dc:eth1"]
