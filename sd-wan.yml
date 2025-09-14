@@ -5,7 +5,7 @@ topology:
     # FortiGates - Dispositivos SD-WAN
     fgt-branch:
       kind: fortinet_fortigate
-      image: vrnetlab/vr-fortios:6.0.3
+      image: vrnetlab/vr-fortios:7.0.13
       env:
         QEMU_SMP: 1
         QEMU_MEMORY: 1024
@@ -16,7 +16,7 @@ topology:
 
     fgt-datacenter:
       kind: fortinet_fortigate
-      image: vrnetlab/vr-fortios:6.0.3
+      image: vrnetlab/vr-fortios:7.0.13
       env:
         QEMU_SMP: 1
         QEMU_MEMORY: 1024
