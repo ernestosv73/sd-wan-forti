@@ -11,7 +11,6 @@ topology:
         QEMU_MEMORY: 1024
       ports:
         - 80:80
-        - 443:443
       mgmt-ipv4: 172.20.20.21
 
     fgt-datacenter:
@@ -22,7 +21,6 @@ topology:
         QEMU_MEMORY: 1024
       ports:
         - 8080:80
-        - 4443:443
       mgmt-ipv4: 172.20.20.22
 
     # Nodos que simulan los ISPs (Solo proveen conectividad underlay)
